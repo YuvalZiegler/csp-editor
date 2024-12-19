@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>CSP Policy Builder</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .directive-group {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .value-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .value-tag {
+            background: #e9ecef;
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 16px;
+            padding: 0 4px;
+        }
+        input, select, textarea {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 8px;
+        }
+        textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            min-height: 80px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 8px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .output {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 4px;
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+        .error {
+            color: #dc3545;
+            margin-top: 8px;
+        }
+        .success {
+            color: #28a745;
+            margin-top: 8px;
+        }
+        .import-section {
+            margin-bottom: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>CSP Policy Builder</h1>
+        
+        <div class="import-section">
+            <h3>Import Existing CSP</h3>
+            <textarea id="importCsp" placeholder="Paste your CSP string here (e.g., default-src 'self'; script-src 'self' 'unsafe-inline')"></textarea>
+            <button onclick="importCsp()">Import CSP</button>
+        </div>
+        
+        <div id="directiveBuilder">
+            <select id="directiveSelect">
+                <option value="">Select a directive...</option>
+                <option value="default-src">default-src</option>
+                <option value="script-src">script-src</option>
+                <option value="style-src">style-src</option>
+                <option value="img-src">img-src</option>
+                <option value="connect-src">connect-src</option>
+                <option value="font-src">font-src</option>
+                <option value="frame-src">frame-src</option>
+                <option value="media-src">media-src</option>
+                <option value="object-src">object-src</option>
+                <option value="manifest-src">manifest-src</option>
+            </select>
+            <input type="text" id="valueInput" placeholder="Enter value (e.g., 'self', domain.com)">
+            <button onclick="addValue()">Add Value</button>
+        </div>
+
+        <div id="directivesList"></div>
+
+        <div class="output" id="output"></div>
+    </div>
+
+    <script>
+        const directives = new Map();
+
+        // Add event listeners when the page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            const valueInput = document.getElementById('valueInput');
+            
+            // Handle Enter key press
+            valueInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault();
+                    addValue();
+                }
+            });
+
+            // Set initial focus
+            valueInput.focus();
+        });
+
+        function importCsp() {
+            const cspString = document.getElementById('importCsp').value.trim();
+            if (!cspString) {
+                showMessage('Please enter a CSP string to import', 'error');
+                return;
+            }
+
+            try {
+                // Clear existing directives
+                directives.clear();
+
+                // Split the CSP string into directive groups
+                const directiveGroups = cspString.split(';').map(group => group.trim()).filter(Boolean);
+
+                for (const group of directiveGroups) {
+                    // Split each group into directive and values
+                    const parts = group.split(/\s+/);
+                    if (parts.length < 1) continue;
+
+                    const directive = parts[0];
+                    const values = parts.slice(1);
+
+                    if (!directives.has(directive)) {
+                        directives.set(directive, new Set());
+                    }
+
+                    // Add each value to the directive
+                    values.forEach(value => {
+                        if (value) {
+                            directives.get(directive).add(value);
+                        }
+                    });
+                }
+
+                updateUI();
+                showMessage('CSP successfully imported!', 'success');
+                document.getElementById('importCsp').value = '';
+                document.getElementById('valueInput').focus();
+
+            } catch (error) {
+                showMessage('Error parsing CSP string. Please check the format.', 'error');
+            }
+        }
+
+        function addValue() {
+            const directive = document.getElementById('directiveSelect').value;
+            const valueInput = document.getElementById('valueInput');
+            const value = valueInput.value.trim();
+
+            if (!directive || !value) {
+                showMessage('Please select a directive and enter a value', 'error');
+                return;
+            }
+
+            // Validate value format
+            if (!isValidValue(value)) {
+                showMessage('Invalid value format. Use valid domains, keywords like \'self\', or wildcards', 'error');
+                return;
+            }
+
+            if (!directives.has(directive)) {
+                directives.set(directive, new Set());
+            }
+
+            directives.get(directive).add(value);
+            updateUI();
+            clearInputs();
+            
+            // Restore focus to value input after adding
+            valueInput.focus();
+        }
+
+        function isValidValue(value) {
+            // Basic validation for common CSP values
+            const validPatterns = [
+                /^'self'$/,
+                /^'unsafe-inline'$/,
+                /^'unsafe-eval'$/,
+                /^'none'$/,
+                /^https?:\/\/[\w\-.]+(:\d+)?$/,
+                /^[\w\-.]+(:\d+)?$/,
+                /^\*\.[\w\-.]+$/,
+                /^wss?:\/\/[\w\-.]+(:\d+)?$/,
+                /^data:/,
+                /^blob:/,
+                /^'nonce-[\w+/=]+'$/,
+                /^'sha256-[\w+/=]+'$/
+            ];
+
+            return validPatterns.some(pattern => pattern.test(value));
+        }
+
+        function deleteValue(directive, value) {
+            directives.get(directive).delete(value);
+            if (directives.get(directive).size === 0) {
+                directives.delete(directive);
+            }
+            updateUI();
+            // Restore focus to value input after deleting
+            document.getElementById('valueInput').focus();
+        }
+
+        function updateUI() {
+            const directivesList = document.getElementById('directivesList');
+            directivesList.innerHTML = '';
+
+            for (const [directive, values] of directives) {
+                const directiveGroup = document.createElement('div');
+                directiveGroup.className = 'directive-group';
+                
+                const directiveHeader = document.createElement('h3');
+                directiveHeader.textContent = directive;
+                directiveGroup.appendChild(directiveHeader);
+
+                const valueList = document.createElement('div');
+                valueList.className = 'value-list';
+
+                for (const value of values) {
+                    const valueTag = document.createElement('div');
+                    valueTag.className = 'value-tag';
+                    valueTag.innerHTML = `
+                        ${value}
+                        <button class="delete-btn" onclick="deleteValue('${directive}', '${value}')">×</button>
+                    `;
+                    valueList.appendChild(valueTag);
+                }
+
+                directiveGroup.appendChild(valueList);
+                directivesList.appendChild(directiveGroup);
+            }
+
+            updateOutput();
+        }
+
+        function updateOutput() {
+            const output = document.getElementById('output');
+            let cspString = '';
+
+            for (const [directive, values] of directives) {
+                if (cspString) cspString += ';\n';
+                cspString += `${directive} ${Array.from(values).join(' ')}`;
+            }
+
+            output.textContent = cspString;
+        }
+
+        function clearInputs() {
+            // Only clear the value input, keeping the directive selection
+            document.getElementById('valueInput').value = '';
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = type;
+            messageDiv.textContent = message;
+            
+            const container = type === 'error' ? document.getElementById('directiveBuilder') : document.querySelector('.import-section');
+            const existingMessage = container.querySelector('.' + type);
+            if (existingMessage) {
+                existingMessage.remove();
+            }
+            
+            container.appendChild(messageDiv);
+            setTimeout(() => messageDiv.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
