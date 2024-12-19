@@ -1,15 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
+<!DOCTYPE html lang="en">
+<html lang="en"><head></head>
+    <meta charset="UTF-8">
     <title>CSP Policy Builder</title>
     <style>
       :root {
         /* Spacing variables */
-        --spacing-xs: 4px;
-        --spacing-sm: 8px;
-        --spacing-md: 15px;
-        --spacing-lg: 20px;
+        --spacing-xs: 2px;
+        --spacing-sm: 4px;
+        --spacing-md: 8px;
+        --spacing-lg: 16px;
 
         /* Component dimensions */
         --input-height: 32px;
@@ -17,7 +16,7 @@
         --container-max-width: 1200px;
 
         /* Text sizes */
-        --text-sm: 0.875rem;
+        --text-sm: 0.8rem;
         --text-base: 1rem;
         --text-lg: 1.25rem;
 
@@ -29,9 +28,8 @@
 
       body {
         font-family: system-ui, -apple-system, sans-serif;
-        max-width: var(--container-max-width);
+        padding: 0;
         margin: 0 auto;
-        padding: var(--spacing-lg);
         background: #f5f5f5;
         font-size: var(--text-base);
       }
@@ -47,10 +45,13 @@
       }
 
       .container {
+        margin: 2rem auto;
         background: white;
         padding: var(--spacing-lg);
         border-radius: var(--border-radius);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: var(--container-max-width);
       }
 
       .directive-group {
@@ -63,13 +64,14 @@
       .value-list {
         display: flex;
         flex-wrap: wrap;
-        gap: var(--spacing-xs);
+        gap: var(--spacing-sm);
         margin-top: var(--spacing-xs);
+        font-size: var(--text-sm);
       }
 
       .value-tag {
         background: #e9ecef;
-        padding: var(--spacing-xs) var(--spacing-sm);
+        padding: var(--spacing-xs) var(--spacing-md);
         border-radius: var(--border-radius);
         display: flex;
         align-items: center;
@@ -147,25 +149,21 @@
         padding: var(--spacing-md);
         border: 1px solid #ddd;
         border-radius: var(--border-radius);
-        display: flex;
-        flex-direction: column;
-        align-items: center;
       }
 
       .textarea-container {
         width: 100%;
         max-width: 800px;
         padding: var(--spacing-md);
+        display: flex;
+        gap: var(--spacing-sm);
       }
 
-      textarea {
+      .import-input {
+        flex: 1;
         width: 100%;
-        margin-bottom: var(--spacing-sm);
-        min-height: var(--textarea-min-height);
-        height: auto;
         font-size: var(--text-sm);
         line-height: 1.4;
-        resize: vertical;
         font-family: inherit;
       }
 
@@ -192,6 +190,7 @@
 
       #directiveBuilder {
         display: flex;
+        flex-direction: row;
         gap: var(--spacing-sm);
         margin-bottom: var(--section-margin);
       }
@@ -208,11 +207,14 @@
       <div class="import-section">
         <h3>Import Existing CSP</h3>
         <div class="textarea-container">
-          <textarea
-            id="importCsp"
+          <input 
+            type="text" 
+            id="importCsp" 
+            class="import-input"
             placeholder="Paste your CSP string here (e.g., default-src 'self'; script-src 'self' 'unsafe-inline')"
-          ></textarea>
+          >
           <button onclick="importCsp()">Import CSP</button>
+          <button onclick="copyToClipboard()" class="copy-btn">Copy CSP</button>
         </div>
       </div>
 
@@ -220,7 +222,6 @@
         <div class="output-header">
           <span>CSP String Preview</span>
           <span id="charCount">0 characters</span>
-          <button onclick="copyToClipboard()" class="copy-btn">Copy CSP</button>
         </div>
         <div class="output" id="output"></div>
       </div>
@@ -239,11 +240,7 @@
           <option value="object-src">object-src</option>
           <option value="manifest-src">manifest-src</option>
         </select>
-        <input
-          type="text"
-          id="valueInput"
-          placeholder="Enter value (e.g., 'self', domain.com)"
-        />
+        <input type="text" id="valueInput" placeholder="Enter value (e.g., 'self', domain.com)">
         <button onclick="addValue()">Add Value</button>
       </div>
 
@@ -487,5 +484,6 @@
         setTimeout(() => messageDiv.remove(), 3000);
       }
     </script>
-  </body>
-</html>
+  
+
+</body></html>
