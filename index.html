@@ -4,109 +4,200 @@
     <meta charset="UTF-8" />
     <title>CSP Policy Builder</title>
     <style>
+      :root {
+        /* Spacing variables */
+        --spacing-xs: 4px;
+        --spacing-sm: 8px;
+        --spacing-md: 15px;
+        --spacing-lg: 20px;
+
+        /* Component dimensions */
+        --input-height: 32px;
+        --border-radius: 4px;
+        --container-max-width: 1200px;
+
+        /* Text sizes */
+        --text-sm: 0.875rem;
+        --text-base: 1rem;
+        --text-lg: 1.25rem;
+
+        /* Component specific */
+        --directive-group-padding: var(--spacing-md);
+        --section-margin: var(--spacing-md);
+        --textarea-min-height: 80px;
+      }
+
       body {
         font-family: system-ui, -apple-system, sans-serif;
-        max-width: 1200px;
+        max-width: var(--container-max-width);
         margin: 0 auto;
-        padding: 20px;
+        padding: var(--spacing-lg);
         background: #f5f5f5;
+        font-size: var(--text-base);
       }
+
+      h1 {
+        font-size: var(--text-lg);
+        margin: 0 0 var(--spacing-lg);
+      }
+
+      h3 {
+        font-size: var(--text-base);
+        margin: 0 0 var(--spacing-sm);
+      }
+
       .container {
         background: white;
-        padding: 20px;
-        border-radius: 8px;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
+
       .directive-group {
-        margin-bottom: 20px;
-        padding: 15px;
+        margin-bottom: var(--section-margin);
+        padding: var(--directive-group-padding);
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: var(--border-radius);
       }
+
       .value-list {
         display: flex;
         flex-wrap: wrap;
-        gap: 8px;
-        margin-top: 8px;
+        gap: var(--spacing-xs);
+        margin-top: var(--spacing-xs);
       }
+
       .value-tag {
         background: #e9ecef;
-        padding: 4px 8px;
-        border-radius: 4px;
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border-radius: var(--border-radius);
         display: flex;
         align-items: center;
-        gap: 4px;
+        gap: var(--spacing-xs);
+        font-size: var(--text-sm);
       }
+
       .delete-btn {
         background: none;
         border: none;
         color: #dc3545;
         cursor: pointer;
-        font-size: 16px;
-        padding: 0 4px;
+        font-size: var(--text-base);
+        padding: 0 var(--spacing-xs);
       }
+
       input,
       select,
       textarea {
-        padding: 8px;
+        padding: var(--spacing-xs) var(--spacing-sm);
         border: 1px solid #ddd;
-        border-radius: 4px;
-        margin-right: 8px;
+        border-radius: var(--border-radius);
+        margin-right: var(--spacing-sm);
+        height: var(--input-height);
+        font-size: var(--text-sm);
       }
+
       textarea {
         width: 100%;
-        margin-bottom: 10px;
-        min-height: 80px;
+        margin-bottom: var(--spacing-sm);
+        min-height: var(--textarea-min-height);
+        height: auto;
       }
+
       button {
-        padding: 8px 16px;
+        padding: var(--spacing-xs) var(--spacing-md);
         background: #007bff;
         color: white;
         border: none;
-        border-radius: 4px;
+        border-radius: var(--border-radius);
         cursor: pointer;
-        margin-bottom: 8px;
+        margin-bottom: var(--spacing-sm);
+        height: var(--input-height);
+        font-size: var(--text-sm);
       }
+
       button:hover {
         background: #0056b3;
       }
+
       .output {
-        margin-top: 20px;
-        padding: 15px;
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-md);
         background: #f8f9fa;
-        border-radius: 4px;
+        border-radius: var(--border-radius);
         white-space: pre-wrap;
         word-break: break-all;
+        font-size: var(--text-sm);
       }
+
       .error {
         color: #dc3545;
-        margin-top: 8px;
+        margin-top: var(--spacing-sm);
+        font-size: var(--text-sm);
       }
+
       .success {
         color: #28a745;
-        margin-top: 8px;
+        margin-top: var(--spacing-sm);
+        font-size: var(--text-sm);
       }
+
       .import-section {
-        margin-bottom: 20px;
-        padding: 15px;
+        margin-bottom: var(--section-margin);
+        padding: var(--spacing-md);
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: var(--border-radius);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
       }
+
+      .textarea-container {
+        width: 100%;
+        max-width: 800px;
+        padding: var(--spacing-md);
+      }
+
+      textarea {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+        min-height: var(--textarea-min-height);
+        height: auto;
+        font-size: var(--text-sm);
+        line-height: 1.4;
+        resize: vertical;
+        font-family: inherit;
+      }
+
       .output-container {
-        margin: 20px 0;
+        margin: var(--section-margin) 0;
       }
+
       .output-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 10px;
+        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-sm);
       }
+
       .copy-btn {
         margin: 0;
         background: #28a745;
       }
+
       .copy-btn:hover {
         background: #218838;
+      }
+
+      #directiveBuilder {
+        display: flex;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--section-margin);
+      }
+
+      #valueInput {
+        flex: 1;
       }
     </style>
   </head>
@@ -116,11 +207,13 @@
 
       <div class="import-section">
         <h3>Import Existing CSP</h3>
-        <textarea
-          id="importCsp"
-          placeholder="Paste your CSP string here (e.g., default-src 'self'; script-src 'self' 'unsafe-inline')"
-        ></textarea>
-        <button onclick="importCsp()">Import CSP</button>
+        <div class="textarea-container">
+          <textarea
+            id="importCsp"
+            placeholder="Paste your CSP string here (e.g., default-src 'self'; script-src 'self' 'unsafe-inline')"
+          ></textarea>
+          <button onclick="importCsp()">Import CSP</button>
+        </div>
       </div>
 
       <div class="output-container">
