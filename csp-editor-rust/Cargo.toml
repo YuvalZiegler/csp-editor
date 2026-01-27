@@ -1,0 +1,18 @@
+[package]
+name = "csp-editor"
+version = "1.0.0"
+edition = "2021"
+authors = ["CSP Editor"]
+description = "An interactive Content Security Policy (CSP) builder and editor"
+license = "MIT"
+
+[dependencies]
+ratatui = "0.28"
+crossterm = "0.28"
+regex = "1.10"
+lazy_static = "1.4"
+copypasta = "0.10"
+
+[[bin]]
+name = "csp-editor"
+path = "src/main.rs"
