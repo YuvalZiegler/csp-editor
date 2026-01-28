@@ -1,0 +1,26 @@
+{
+  "name": "csp-editor",
+  "version": "1.0.0",
+  "description": "a claude artifact",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YuvalZiegler/csp-editor.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YuvalZiegler/csp-editor/issues"
+  },
+  "homepage": "https://github.com/YuvalZiegler/csp-editor#readme",
+  "dependencies": {
+    "@hono/node-server": "^1.19.9",
+    "hono": "^4.11.7"
+  }
+}
