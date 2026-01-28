@@ -1,0 +1,357 @@
+<!DOCTYPE html lang="he">
+<html lang="he" dir="rtl"><head></head>
+    <meta charset="UTF-8">
+    <title>בונה מדיניות CSP</title>
+    <style>
+      :root {
+        --spacing-xs: 2px;
+        --spacing-sm: 4px;
+        --spacing-md: 8px;
+        --spacing-lg: 16px;
+        --input-height: 32px;
+        --border-radius: 4px;
+        --container-max-width: 1200px;
+        --text-sm: 0.8rem;
+        --text-base: 1rem;
+        --text-lg: 1.25rem;
+        --directive-group-padding: var(--spacing-md);
+        --section-margin: var(--spacing-md);
+        --textarea-min-height: 80px;
+      }
+
+      body {
+        font-family: system-ui, -apple-system, sans-serif;
+        padding: 0;
+        margin: 0 auto;
+        background: #f5f5f5;
+        font-size: var(--text-base);
+        direction: rtl;
+      }
+
+      h1 { font-size: var(--text-lg); margin: 0 0 var(--spacing-lg); }
+      h3 { font-size: var(--text-base); margin: 0 0 var(--spacing-sm); }
+
+      .container {
+        margin: 2rem auto;
+        background: white;
+        padding: var(--spacing-lg);
+        border-radius: var(--border-radius);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        width: 100%;
+        max-width: var(--container-max-width);
+      }
+
+      .directive-group {
+        margin-bottom: var(--section-margin);
+        padding: var(--directive-group-padding);
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+      }
+
+      .value-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--spacing-sm);
+        margin-top: var(--spacing-xs);
+        font-size: var(--text-sm);
+      }
+
+      .value-tag {
+        background: #e9ecef;
+        padding: var(--spacing-xs) var(--spacing-md);
+        border-radius: var(--border-radius);
+        display: flex;
+        align-items: center;
+        gap: var(--spacing-xs);
+        font-size: var(--text-sm);
+        direction: ltr;
+      }
+
+      .delete-btn {
+        background: none;
+        border: none;
+        color: #dc3545;
+        cursor: pointer;
+        font-size: var(--text-base);
+        padding: 0 var(--spacing-xs);
+      }
+
+      input, select, textarea {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+        margin-left: var(--spacing-sm);
+        height: var(--input-height);
+        font-size: var(--text-sm);
+      }
+
+      textarea {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+        min-height: var(--textarea-min-height);
+        height: auto;
+      }
+
+      button {
+        padding: var(--spacing-xs) var(--spacing-md);
+        background: #007bff;
+        color: white;
+        border: none;
+        border-radius: var(--border-radius);
+        cursor: pointer;
+        margin-bottom: var(--spacing-sm);
+        height: var(--input-height);
+        font-size: var(--text-sm);
+      }
+
+      button:hover { background: #0056b3; }
+
+      .output {
+        margin-top: var(--spacing-sm);
+        padding: var(--spacing-md);
+        background: #f8f9fa;
+        border-radius: var(--border-radius);
+        white-space: pre-wrap;
+        word-break: break-all;
+        font-size: var(--text-sm);
+        direction: ltr;
+        text-align: left;
+      }
+
+      .error { color: #dc3545; margin-top: var(--spacing-sm); font-size: var(--text-sm); }
+      .success { color: #28a745; margin-top: var(--spacing-sm); font-size: var(--text-sm); }
+
+      .import-section {
+        margin-bottom: var(--section-margin);
+        padding: var(--spacing-md);
+        border: 1px solid #ddd;
+        border-radius: var(--border-radius);
+      }
+
+      .textarea-container {
+        width: 100%;
+        max-width: 800px;
+        padding: var(--spacing-md);
+        display: flex;
+        gap: var(--spacing-sm);
+      }
+
+      .import-input {
+        flex: 1;
+        width: 100%;
+        font-size: var(--text-sm);
+        line-height: 1.4;
+        font-family: inherit;
+        direction: ltr;
+        text-align: left;
+      }
+
+      .output-container { margin: var(--section-margin) 0; }
+
+      .output-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: var(--spacing-sm);
+        font-size: var(--text-sm);
+      }
+
+      .copy-btn { margin: 0; background: #28a745; }
+      .copy-btn:hover { background: #218838; }
+
+      #directiveBuilder {
+        display: flex;
+        flex-direction: row;
+        gap: var(--spacing-sm);
+        margin-bottom: var(--section-margin);
+      }
+
+      #valueInput {
+        flex: 1;
+        direction: ltr;
+        text-align: left;
+      }
+
+      #directiveSelect {
+        direction: ltr;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>בונה מדיניות CSP</h1>
+
+      <div class="import-section">
+        <h3>ייבוא CSP קיים</h3>
+        <div class="textarea-container">
+          <input type="text" id="importCsp" class="import-input"
+            placeholder="הדבק את מחרוזת ה-CSP כאן (לדוגמה: default-src 'self'; script-src 'self' 'unsafe-inline')">
+          <button onclick="importCsp()">ייבוא CSP</button>
+          <button onclick="copyToClipboard()" class="copy-btn">העתק CSP</button>
+        </div>
+      </div>
+
+      <div class="output-container">
+        <div class="output-header">
+          <span>תצוגה מקדימה של מחרוזת CSP</span>
+          <span id="charCount">0 תווים</span>
+        </div>
+        <div class="output" id="output"></div>
+      </div>
+
+      <div id="directiveBuilder">
+        <select id="directiveSelect">
+          <option value="">בחר הנחיה...</option>
+          <option value="default-src">default-src</option>
+          <option value="script-src">script-src</option>
+          <option value="style-src">style-src</option>
+          <option value="img-src">img-src</option>
+          <option value="connect-src">connect-src</option>
+          <option value="font-src">font-src</option>
+          <option value="frame-src">frame-src</option>
+          <option value="media-src">media-src</option>
+          <option value="object-src">object-src</option>
+          <option value="manifest-src">manifest-src</option>
+        </select>
+        <input type="text" id="valueInput" placeholder="הזן ערך (לדוגמה: 'self', domain.com)">
+        <button onclick="addValue()">הוסף ערך</button>
+      </div>
+
+      <div id="directivesList"></div>
+    </div>
+
+    <script>
+      const directives = new Map();
+      const messages = {
+        selectDirective: "אנא בחר הנחיה והזן ערך",
+        invalidValue: "פורמט ערך לא תקין. השתמש בדומיינים תקינים, מילות מפתח כמו 'self', או תווים כלליים",
+        importError: "שגיאה בניתוח מחרוזת CSP. אנא בדוק את הפורמט.",
+        importSuccess: "CSP יובא בהצלחה!",
+        enterCsp: "אנא הזן מחרוזת CSP לייבוא",
+        copied: "הועתק!"
+      };
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const valueInput = document.getElementById("valueInput");
+        valueInput.addEventListener("keypress", function (e) {
+          if (e.key === "Enter") { e.preventDefault(); addValue(); }
+        });
+        valueInput.focus();
+      });
+
+      function importCsp() {
+        const cspString = document.getElementById("importCsp").value.trim();
+        if (!cspString) { showMessage(messages.enterCsp, "error"); return; }
+        try {
+          directives.clear();
+          const directiveGroups = cspString.split(";").map((group) => group.trim()).filter(Boolean);
+          for (const group of directiveGroups) {
+            const parts = group.split(/\s+/);
+            if (parts.length < 1) continue;
+            const directive = parts[0];
+            const values = parts.slice(1);
+            if (!directives.has(directive)) { directives.set(directive, new Set()); }
+            values.forEach((value) => { if (value) { directives.get(directive).add(value); } });
+          }
+          updateUI();
+          showMessage(messages.importSuccess, "success");
+          document.getElementById("importCsp").value = "";
+          document.getElementById("valueInput").focus();
+        } catch (error) { showMessage(messages.importError, "error"); }
+      }
+
+      function addValue() {
+        const directive = document.getElementById("directiveSelect").value;
+        const valueInput = document.getElementById("valueInput");
+        const value = valueInput.value.trim();
+        if (!directive || !value) { showMessage(messages.selectDirective, "error"); return; }
+        if (!isValidValue(value)) { showMessage(messages.invalidValue, "error"); return; }
+        if (!directives.has(directive)) { directives.set(directive, new Set()); }
+        directives.get(directive).add(value);
+        updateUI();
+        clearInputs();
+        valueInput.focus();
+      }
+
+      function isValidValue(value) {
+        const validPatterns = [
+          /^'self'$/, /^'unsafe-inline'$/, /^'unsafe-eval'$/, /^'unsafe-hashes'$/,
+          /^'strict-dynamic'$/, /^'report-sample'$/, /^'none'$/,
+          /^https?:\/\/[\w\-.]+(:\d+)?(\/[\w\-./]*)*$/,
+          /^[\w][\w\-.]*\.[a-z]{2,}(:\d+)?(\/[\w\-./]*)*$/,
+          /^\*\.[\w][\w\-.]*\.[a-z]{2,}$/, /^[\w][\w\-.]*\.\*$/,
+          /^wss?:\/\/[\w\-.]+(:\d+)?(\/[\w\-./]*)*$/,
+          /^data:$/, /^blob:$/, /^filesystem:$/, /^mediastream:$/,
+          /^'nonce-[\w+/=]+'$/, /^'sha256-[\w+/=]+'$/, /^'sha384-[\w+/=]+'$/, /^'sha512-[\w+/=]+'$/,
+        ];
+        return validPatterns.some((pattern) => pattern.test(value));
+      }
+
+      function deleteValue(directive, value) {
+        directives.get(directive).delete(value);
+        if (directives.get(directive).size === 0) { directives.delete(directive); }
+        updateUI();
+        document.getElementById("valueInput").focus();
+      }
+
+      function updateUI() {
+        const directivesList = document.getElementById("directivesList");
+        directivesList.innerHTML = "";
+        for (const [directive, values] of directives) {
+          const directiveGroup = document.createElement("div");
+          directiveGroup.className = "directive-group";
+          const directiveHeader = document.createElement("h3");
+          directiveHeader.textContent = directive;
+          directiveHeader.style.direction = "ltr";
+          directiveHeader.style.textAlign = "left";
+          directiveGroup.appendChild(directiveHeader);
+          const valueList = document.createElement("div");
+          valueList.className = "value-list";
+          for (const value of values) {
+            const valueTag = document.createElement("div");
+            valueTag.className = "value-tag";
+            valueTag.innerHTML = `${value}<button class="delete-btn" onclick="deleteValue('${directive}', '${value}')">×</button>`;
+            valueList.appendChild(valueTag);
+          }
+          directiveGroup.appendChild(valueList);
+          directivesList.appendChild(directiveGroup);
+        }
+        updateOutput();
+      }
+
+      function updateOutput() {
+        const output = document.getElementById("output");
+        let cspString = "";
+        for (const [directive, values] of directives) {
+          if (cspString) cspString += ";\n";
+          cspString += `${directive} ${Array.from(values).join(" ")}`;
+        }
+        output.textContent = cspString;
+        document.getElementById("charCount").textContent = `${cspString.length} תווים`;
+      }
+
+      function copyToClipboard() {
+        const output = document.getElementById("output");
+        const text = output.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          const copyBtn = document.querySelector(".copy-btn");
+          const originalText = copyBtn.textContent;
+          copyBtn.textContent = messages.copied;
+          setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+        }).catch((err) => { console.error("Failed to copy text: ", err); });
+      }
+
+      function clearInputs() { document.getElementById("valueInput").value = ""; }
+
+      function showMessage(message, type) {
+        const messageDiv = document.createElement("div");
+        messageDiv.className = type;
+        messageDiv.textContent = message;
+        const container = type === "error" ? document.getElementById("directiveBuilder") : document.querySelector(".import-section");
+        const existingMessage = container.querySelector("." + type);
+        if (existingMessage) { existingMessage.remove(); }
+        container.appendChild(messageDiv);
+        setTimeout(() => messageDiv.remove(), 3000);
+      }
+    </script>
+</body></html>
